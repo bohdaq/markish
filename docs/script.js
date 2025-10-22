@@ -282,6 +282,7 @@ let currentSlide = 0;
 const totalSlides = carouselSlides.length;
 
 function updateCarousel() {
+    if (carouselSlides.length === 0 || !carouselSlides[0]) return;
     const slideWidth = carouselSlides[0].getBoundingClientRect().width;
     carouselTrack.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
     
@@ -320,8 +321,11 @@ indicators.forEach((indicator, index) => {
     indicator.addEventListener('click', () => goToSlide(index));
 });
 
-// Auto-play carousel (optional)
-let autoplayInterval = setInterval(nextSlide, 5000);
+// Auto-play carousel (optional) - only if carousel exists
+let autoplayInterval;
+if (carouselSlides.length > 0) {
+    autoplayInterval = setInterval(nextSlide, 5000);
+}
 
 // Pause autoplay on hover
 const carousel = document.querySelector('.carousel');
