@@ -215,6 +215,141 @@ if ('loading' in HTMLImageElement.prototype) {
     document.body.appendChild(script);
 }
 
+// About Section Carousel functionality
+const aboutCarouselTrack = document.querySelector('.about-carousel-track');
+const aboutCarouselSlides = Array.from(document.querySelectorAll('.about-carousel-slide'));
+const aboutCarouselContainer = document.querySelector('.about-carousel-track-container');
+
+let aboutCurrentSlide = 0;
+const aboutTotalSlides = aboutCarouselSlides.length;
+
+function updateAboutCarousel() {
+    if (aboutCarouselSlides.length === 0) return;
+    const slideWidth = aboutCarouselSlides[0].getBoundingClientRect().width;
+    aboutCarouselTrack.style.transform = `translateX(-${aboutCurrentSlide * slideWidth}px)`;
+}
+
+function nextAboutSlide() {
+    aboutCurrentSlide = (aboutCurrentSlide + 1) % aboutTotalSlides;
+    updateAboutCarousel();
+}
+
+function prevAboutSlide() {
+    aboutCurrentSlide = (aboutCurrentSlide - 1 + aboutTotalSlides) % aboutTotalSlides;
+    updateAboutCarousel();
+}
+
+// Click on left/right side of carousel to navigate
+if (aboutCarouselContainer) {
+    aboutCarouselContainer.addEventListener('click', (e) => {
+        const rect = aboutCarouselContainer.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const containerWidth = rect.width;
+        
+        // If clicked on left half, go to previous slide
+        if (clickX < containerWidth / 2) {
+            prevAboutSlide();
+        } else {
+            // If clicked on right half, go to next slide
+            nextAboutSlide();
+        }
+    });
+}
+
+// Auto-play About carousel
+let aboutAutoplayInterval = setInterval(nextAboutSlide, 4000);
+
+// Pause autoplay on hover
+const aboutCarousel = document.querySelector('.about-carousel');
+if (aboutCarousel) {
+    aboutCarousel.addEventListener('mouseenter', () => {
+        clearInterval(aboutAutoplayInterval);
+    });
+    
+    aboutCarousel.addEventListener('mouseleave', () => {
+        aboutAutoplayInterval = setInterval(nextAboutSlide, 4000);
+    });
+}
+
+// Portfolio Carousel functionality
+const carouselTrack = document.querySelector('.carousel-track');
+const carouselSlides = Array.from(document.querySelectorAll('.carousel-slide'));
+const prevButton = document.querySelector('.carousel-btn-prev');
+const nextButton = document.querySelector('.carousel-btn-next');
+const indicators = Array.from(document.querySelectorAll('.carousel-indicator'));
+
+let currentSlide = 0;
+const totalSlides = carouselSlides.length;
+
+function updateCarousel() {
+    const slideWidth = carouselSlides[0].getBoundingClientRect().width;
+    carouselTrack.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
+    
+    // Update indicators
+    indicators.forEach((indicator, index) => {
+        if (index === currentSlide) {
+            indicator.classList.add('active');
+        } else {
+            indicator.classList.remove('active');
+        }
+    });
+}
+
+function goToSlide(index) {
+    currentSlide = index;
+    updateCarousel();
+}
+
+function nextSlide() {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    updateCarousel();
+}
+
+function prevSlide() {
+    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+    updateCarousel();
+}
+
+// Event listeners
+if (prevButton && nextButton) {
+    prevButton.addEventListener('click', prevSlide);
+    nextButton.addEventListener('click', nextSlide);
+}
+
+indicators.forEach((indicator, index) => {
+    indicator.addEventListener('click', () => goToSlide(index));
+});
+
+// Auto-play carousel (optional)
+let autoplayInterval = setInterval(nextSlide, 5000);
+
+// Pause autoplay on hover
+const carousel = document.querySelector('.carousel');
+if (carousel) {
+    carousel.addEventListener('mouseenter', () => {
+        clearInterval(autoplayInterval);
+    });
+    
+    carousel.addEventListener('mouseleave', () => {
+        autoplayInterval = setInterval(nextSlide, 5000);
+    });
+}
+
+// Update carousels on window resize
+window.addEventListener('resize', () => {
+    updateAboutCarousel();
+    updateCarousel();
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+        prevSlide();
+    } else if (e.key === 'ArrowRight') {
+        nextSlide();
+    }
+});
+
 // Console log for development
 console.log('Marta Films website loaded successfully');
 console.log('For inquiries, please fill out the contact form or email hello@martafilms.com');
