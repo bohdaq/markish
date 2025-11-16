@@ -362,33 +362,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const startTime = parseFloat(video.getAttribute('data-start-time'));
         let hasSetInitialTime = false;
         
-        // Function to set the start time
-        const setStartTime = () => {
+        // Remove autoplay temporarily
+        video.removeAttribute('autoplay');
+        
+        // Function to set the start time and play
+        const setStartTimeAndPlay = () => {
             if (!hasSetInitialTime && video.readyState >= 2) {
                 video.currentTime = startTime;
                 hasSetInitialTime = true;
+                // Play after setting the time
+                video.play().catch(err => console.log('Autoplay prevented:', err));
             }
         };
         
-        // Set initial start time when metadata is loaded
-        video.addEventListener('loadedmetadata', setStartTime);
-        video.addEventListener('loadeddata', setStartTime);
+        // Set initial start time when data is loaded
+        video.addEventListener('loadeddata', setStartTimeAndPlay);
         
         // Also try to set it immediately if already loaded
-        setStartTime();
+        if (video.readyState >= 2) {
+            setStartTimeAndPlay();
+        }
         
         // Loop back to start time when video ends
         video.addEventListener('timeupdate', () => {
             if (video.currentTime >= video.duration - 0.1) {
                 video.currentTime = startTime;
-            }
-        });
-        
-        // Ensure video starts at correct time when it begins playing
-        video.addEventListener('playing', () => {
-            if (video.currentTime < startTime && !hasSetInitialTime) {
-                video.currentTime = startTime;
-                hasSetInitialTime = true;
             }
         });
     });
