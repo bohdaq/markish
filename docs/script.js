@@ -354,6 +354,40 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Handle videos with start times in service cards
+document.addEventListener('DOMContentLoaded', () => {
+    const serviceVideos = document.querySelectorAll('.service-card-front video[data-start-time]');
+    
+    serviceVideos.forEach(video => {
+        const startTime = parseFloat(video.getAttribute('data-start-time'));
+        
+        // Set initial start time when metadata is loaded
+        video.addEventListener('loadedmetadata', () => {
+            video.currentTime = startTime;
+        });
+        
+        // Also try to set it immediately if already loaded
+        if (video.readyState >= 1) {
+            video.currentTime = startTime;
+        }
+        
+        // Loop back to start time when video ends
+        video.addEventListener('timeupdate', () => {
+            if (video.currentTime >= video.duration - 0.1) {
+                video.currentTime = startTime;
+                video.play();
+            }
+        });
+        
+        // Ensure video starts at correct time when it begins playing
+        video.addEventListener('play', () => {
+            if (video.currentTime < startTime) {
+                video.currentTime = startTime;
+            }
+        });
+    });
+});
+
 // Console log for development
 console.log('Marta Films website loaded successfully');
 console.log('For inquiries, please fill out the contact form or email hello@martafilms.com');
