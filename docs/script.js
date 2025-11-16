@@ -360,27 +360,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     serviceVideos.forEach(video => {
         const startTime = parseFloat(video.getAttribute('data-start-time'));
-        let hasSetInitialTime = false;
+        let isInitialSeek = true;
         
         // Remove autoplay temporarily
         video.removeAttribute('autoplay');
         
-        // Function to set the start time and play
-        const setStartTimeAndPlay = () => {
-            if (!hasSetInitialTime && video.readyState >= 2) {
+        // Wait for video to be ready
+        const initVideo = () => {
+            if (video.readyState >= 2) {
+                // Set the start time
                 video.currentTime = startTime;
-                hasSetInitialTime = true;
-                // Play after setting the time
-                video.play().catch(err => console.log('Autoplay prevented:', err));
             }
         };
         
-        // Set initial start time when data is loaded
-        video.addEventListener('loadeddata', setStartTimeAndPlay);
+        // When the seek operation completes, start playing
+        video.addEventListener('seeked', () => {
+            if (isInitialSeek && Math.abs(video.currentTime - startTime) < 0.5) {
+                isInitialSeek = false;
+                video.play().catch(err => console.log('Autoplay prevented:', err));
+            }
+        });
         
-        // Also try to set it immediately if already loaded
+        // Initialize when data is loaded
+        video.addEventListener('loadeddata', initVideo);
+        
+        // Also try immediately if already loaded
         if (video.readyState >= 2) {
-            setStartTimeAndPlay();
+            initVideo();
         }
         
         // Loop back to start time when video ends
