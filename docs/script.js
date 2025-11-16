@@ -360,29 +360,35 @@ document.addEventListener('DOMContentLoaded', () => {
     
     serviceVideos.forEach(video => {
         const startTime = parseFloat(video.getAttribute('data-start-time'));
+        let hasSetInitialTime = false;
+        
+        // Function to set the start time
+        const setStartTime = () => {
+            if (!hasSetInitialTime && video.readyState >= 2) {
+                video.currentTime = startTime;
+                hasSetInitialTime = true;
+            }
+        };
         
         // Set initial start time when metadata is loaded
-        video.addEventListener('loadedmetadata', () => {
-            video.currentTime = startTime;
-        });
+        video.addEventListener('loadedmetadata', setStartTime);
+        video.addEventListener('loadeddata', setStartTime);
         
         // Also try to set it immediately if already loaded
-        if (video.readyState >= 1) {
-            video.currentTime = startTime;
-        }
+        setStartTime();
         
         // Loop back to start time when video ends
         video.addEventListener('timeupdate', () => {
             if (video.currentTime >= video.duration - 0.1) {
                 video.currentTime = startTime;
-                video.play();
             }
         });
         
         // Ensure video starts at correct time when it begins playing
-        video.addEventListener('play', () => {
-            if (video.currentTime < startTime) {
+        video.addEventListener('playing', () => {
+            if (video.currentTime < startTime && !hasSetInitialTime) {
                 video.currentTime = startTime;
+                hasSetInitialTime = true;
             }
         });
     });
